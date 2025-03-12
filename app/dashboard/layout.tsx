@@ -40,7 +40,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b bg-background">
-        <div className="container flex h-16 items-center justify-between">
+        <div className="px-10 flex h-16 items-center justify-between">
           <div className="flex items-center gap-2 font-semibold">
             <span className="text-xl text-primary">TaskMaster</span>
           </div>
@@ -59,7 +59,7 @@ export default function DashboardLayout({
           </nav>
         </div>
       </header>
-      <div className="container flex-1 items-start md:grid md:grid-cols-[220px_1fr] md:gap-6 lg:grid-cols-[240px_1fr] lg:gap-10">
+      <div className="flex-1 items-start md:grid md:grid-cols-[220px_1fr] md:gap-6 lg:grid-cols-[240px_1fr] lg:gap-10">
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <aside className="fixed inset-0 top-16 z-30 h-[calc(100vh-4rem)] w-full overflow-y-auto border-r bg-background p-6 md:hidden">
@@ -82,7 +82,7 @@ export default function DashboardLayout({
           </aside>
         )}
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block">
+        <aside className="hidden md:block py-5 px-5">
           <nav className="sticky top-20 flex flex-col gap-2">
             {routes.map((route) => (
               <Link key={route.href} href={route.href}>
@@ -94,7 +94,7 @@ export default function DashboardLayout({
             ))}
           </nav>
         </aside>
-        <main className="flex w-full flex-col overflow-hidden py-6">{children}</main>
+        <main className="flex w-full flex-col overflow-hidden py-6 px-3 md:px-0 md:pr-10">{children}</main>
       </div>
     </div>
   )
