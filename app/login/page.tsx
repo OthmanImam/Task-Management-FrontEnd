@@ -1,5 +1,4 @@
 "use client"
-
 import type React from "react"
 
 import { useState } from "react"
@@ -9,21 +8,62 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { loginApi } from "../api/config/auth"
+import { FormData } from "../shared/types"
+import { authValidationSchema } from "../utils/authValidationSchema"
 
 export default function LoginPage() {
   const router = useRouter()
+  const [errors, setErrors] = useState<FormData>({
+    email: '',
+    password: '',
+  })
   const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({ email: "", password: "" }); // Clear errors before submitting
 
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
-  }
+    try {
+      await authValidationSchema.validate(formData, { abortEarly: false });
+      await loginApi(formData);
+      router.push("/dashboard");
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const validationErrors: Record<string, string> = {}
+        err.inner.forEach((error) => {
+          if (error.path) validationErrors[error.path] = error.message
+        })
+        setErrors({
+          email: validationErrors.email || '',
+          password: validationErrors.password || '',
+        })
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   const handleGoogleLogin = () => {
     setIsLoading(true)
@@ -37,6 +77,7 @@ export default function LoginPage() {
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      {/* {errors.general && <p className="text-sm text-destructive text-center">{errors.general}</p>} */}
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
@@ -46,7 +87,8 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input type="email" name="email" placeholder="m@example.com" value={formData.email} onChange={handleChange} hasError={!!errors.email}
+                errorMessage={errors.email} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -55,7 +97,7 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input id="password" type="text" name="password" value={formData.password} onChange={handleChange} required />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Login"}

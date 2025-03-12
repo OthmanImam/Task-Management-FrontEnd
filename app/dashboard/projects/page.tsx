@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-import { useState } from "react"
+
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -16,28 +17,73 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { FolderPlus, Plus, Users } from "lucide-react"
+import React from "react"
+import { projectApi, getProjectsApi } from "@/app/api/config/auth"
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [newProject, setNewProject] = useState({ name: "", description: "" })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    description: ''
+  })
 
-  const handleCreateProject = () => {
-    if (newProject.name.trim() === "") return
+  useEffect(() => {
+    const isAdmin = localStorage.getItem('token')
+    const role = localStorage.getItem('role')
+  }, [])
 
-    const project = {
-      id: Date.now().toString(),
-      name: newProject.name,
-      description: newProject.description,
-      tasks: 0,
-      members: 1,
-      createdAt: new Date().toISOString(),
-    }
+  const handleCreateProject = (e: any) => {
+    e.preventDefault()
+    console.log(formData)
+    const { name, value } = e.target
 
-    setProjects([...projects, project])
-    setNewProject({ name: "", description: "" })
-    setIsDialogOpen(false)
+    setFormData({
+      ...formData,
+      [name]: value,
+    })
+    // setNewProject(formData)
+    // setIsDialogOpen(false)
   }
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault()
+    console.log(formData)
+    try {
+      await projectApi(formData)
+      setProjects([...projects, {
+        name: formData.name,
+        description: formData.description,
+        createdAt: new Date().toISOString(),
+      }])
+      setIsDialogOpen(false)
+      setFormData({
+        name: '',
+        description: ''
+      })
+    }
+    catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await getProjectsApi();
+        setProjects(response.data.data.data || []);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+
+
+
 
   return (
     <div className="space-y-6">
@@ -63,9 +109,11 @@ export default function ProjectsPage() {
                 <Label htmlFor="name">Project Name</Label>
                 <Input
                   id="name"
+                  name="name"
                   placeholder="Enter project name"
-                  value={newProject.name}
-                  onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                  value={formData.name}
+                  type="text"
+                  onChange={handleCreateProject}
                   className="border-input focus-visible:ring-primary"
                 />
               </div>
@@ -73,9 +121,10 @@ export default function ProjectsPage() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
+                  name="description"
                   placeholder="Enter project description"
-                  value={newProject.description}
-                  onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                  value={formData.description}
+                  onChange={handleCreateProject}
                   className="border-input focus-visible:ring-primary"
                 />
               </div>
@@ -84,7 +133,7 @@ export default function ProjectsPage() {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateProject}>Create Project</Button>
+              <Button onClick={handleSubmit}>Create Project</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

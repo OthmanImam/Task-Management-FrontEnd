@@ -9,20 +9,40 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { signUpApi } from "../api/config/auth"
 
 export default function SignupPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log(formData)
     setIsLoading(true)
-
-    // Simulate signup
-    setTimeout(() => {
+    try {
+      await signUpApi(formData)
       setIsLoading(false)
       router.push("/dashboard")
-    }, 1000)
+    } catch (error) {
+      console.log(error)
+      setIsLoading(false)
+
+    }
+  }
+
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const { name, value } = e.target
+    setFormData({
+      ...formData,
+      [name]: value,
+    })
   }
 
   const handleGoogleSignup = () => {
@@ -46,15 +66,16 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="John Doe" required />
+
+              <Input id="name" placeholder="John Doe" type="text" value={formData.name} name="name" required onChange={handleChange} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" type="email" name="email" placeholder="m@example.com" value={formData.email} onChange={handleChange} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required />
+              <Input id="password" type="password" name="password" value={formData.password} onChange={handleChange} required />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create account"}
