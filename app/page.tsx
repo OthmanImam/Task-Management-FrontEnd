@@ -9,10 +9,10 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b">
-        <div className="container flex h-16 items-center justify-between px-10">
+      <header className="border-b bg-background">
+        <div className="flex h-16 items-center justify-between px-10">
           <div className="flex items-center gap-2 font-semibold">
-            <span className="text-xl">TaskMaster</span>
+            <span className="text-xl text-primary">TaskMaster</span>
           </div>
           <nav className="flex gap-4">
             <Link href="/login">
@@ -24,8 +24,8 @@ export default function Home() {
           </nav>
         </div>
       </header>
-      <main className="flex-1">
-        <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
+      <main className="flex-1 px-10">
+        <section className="grid items-center gap-6 pb-8 pt-6 md:py-10">
           <div className="flex max-w-[980px] flex-col items-start gap-2">
             <h1 className="text-3xl font-bold leading-tight tracking-tighter md:text-5xl">
               Manage your tasks <br className="hidden sm:inline" />
@@ -36,7 +36,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex gap-4">
-            <Link href="/dashboard">
+            <Link href="/signup">
               <Button size="lg" className="gap-2">
                 Get Started <ArrowRight className="h-4 w-4" />
               </Button>
